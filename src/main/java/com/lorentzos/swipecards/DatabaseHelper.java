@@ -118,6 +118,13 @@ public class DatabaseHelper {
         return null;
     }
 
+    public Cursor getNewCards(int id){
+        String[] columns = new String[] {KEY_ROWID, KEY_URL, KEY_TAG, KEY_QCFLAG, KEY_KEYSPACE, KEY_TRUTH, KEY_ANSWERED_OR_NOT, KEY_IMAGE};
+        Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_ROWID + " > " + id, null, null, null,  KEY_ROWID + " ASC");
+        return c;
+
+    }
+
   /*  public long addBlogger(int id, String blogger_name_en, String blogger_name_mal, String blog_name_en ,
                            String blog_name_mal, String description, String phone_number, String email,
                            String google_plus, String facebook, int weight, int loadedOrNot, String blog_url

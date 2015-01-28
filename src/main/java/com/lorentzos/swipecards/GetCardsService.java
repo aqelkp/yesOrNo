@@ -47,7 +47,8 @@ public class GetCardsService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        for (int i = 0; i < 5; i++){
+        Log.d("Service ", "Started Service");
+        for (int i = 0; i < 10; i++){
             try {
                 pullCards();
             } catch (URISyntaxException e) {
@@ -55,8 +56,9 @@ public class GetCardsService extends IntentService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            sendBroadCast();
+            sendBroadCast(1);
         }
+        sendBroadCast(2);
 
 //        ResultReceiver rec = intent.getParcelableExtra("receiver");
         // Extract additional values from the bundle
@@ -68,9 +70,9 @@ public class GetCardsService extends IntentService {
 //        rec.send(Activity.RESULT_OK, bundle);
     }
 
-    private void sendBroadCast() {
+    private void sendBroadCast(int status) {
         Intent intent = new Intent(NOTIFICATION);
-        intent.putExtra(BROADCAST_STATUS, 1);
+        intent.putExtra(BROADCAST_STATUS, status);
        //intent.putExtra((Serializable)newObj);
         //intent.putExtra("myObject", new Gson().toJson(myobject);
         sendBroadcast(intent);
@@ -115,25 +117,23 @@ public class GetCardsService extends IntentService {
                     newObj.setQcflag(mainJSON.getInt("qcflag"));
                     newObj.setKeyspace(mainJSON.getString("keyspace"));
                     newObj.setImage(filePath);
-                    data.open();
-                    data.addCardObj(newObj);
-                    data.close();
                     Log.d("JSON tag", mainJSON.getString("tag"));
 
                     //Downloading image
                     // Create a new HttpClient and Post Header
+                    Log.d("JSON tag", "Downlaoding Images");
+                    Long time = System.currentTimeMillis();
                     HttpGet httpget = new HttpGet();
                     httpclient = new DefaultHttpClient();
                     httpget.setURI(new URI(newObj.getUrl()));
                     response = httpclient.execute(httpget);
-                    Log.d("JSON tag", "Downlaoding Images");
 
                     BufferedHttpEntity httpEntity = new BufferedHttpEntity(response.getEntity());
                     InputStream is=httpEntity.getContent();
 
                     OutputStream outputStream = openFileOutput(fileName , Context.MODE_PRIVATE);
                     try {
-                        final byte[] buffer = new byte[1024];
+                        final byte[] buffer = new byte[100 * 1024];
                         int read;
 
                         while ((read = is.read(buffer)) != -1)
@@ -145,7 +145,13 @@ public class GetCardsService extends IntentService {
                     }
                     File neww = getFilesDir();
                     Log.e("LOGTAG", "" + neww.getAbsolutePath());
+                    Long a = System.currentTimeMillis() - time;
                     Log.e("Download ", "Finished " + fileName);
+                    Log.e("Download ", "Time taken : " + Long.toString(a));
+                    data.open();
+                    data.addCardObj(newObj);
+                    data.close();
+
 
                 }
                 } catch (JSONException e) {

@@ -43,7 +43,7 @@ public class MyActivity extends Activity {
     SwipeAdapter arrayAdapter;
     final ArrayList<ObjCard> alObjCards = new ArrayList<>();
     Boolean isCardsAvailable = false;
-
+    int id_LastCard = 0;
 
     @InjectView(R.id.frame) SwipeFlingAdapterView flingContainer;
 
@@ -58,13 +58,20 @@ public class MyActivity extends Activity {
             Log.d("Reciever ", " Broacast Recieved");
             if (bundle != null) {
                 if (bundle.getInt(GetCardsService.BROADCAST_STATUS) == 1){
-
+                    Log.d("Reciever ", " Broacast Recieved inside");
                     data.open();
-                    Cursor cur = data.getAllCards();
+                    Cursor cur = data.getNewCards(id_LastCard);
                     getDataFromCursor(cur);
+                    if (cur.getCount() > 0){
+                        arrayAdapter.notifyDataSetChanged();
+                        isAdapterEmpty = false;
+                    }
                     data.close();
-                    arrayAdapter = new SwipeAdapter(MyActivity.this, alObjCards);
-
+                }
+                if (bundle.getInt(GetCardsService.BROADCAST_STATUS) == 2){
+                    Log.d("Reciever ", " Broacast Recieved To restart");
+                    Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
+                    startService(getCards);
                 }
             }
         }
@@ -137,23 +144,30 @@ public class MyActivity extends Activity {
 
             @Override
             public void onRightCardExit(Object dataObject) {
-                ObjCard currentCard = arrayAdapter.getItem(0);
-                currentCard.setTruth(1);
-                postTask = new postResults();
-                postTask.execute(currentCard);
+                try {
+                    ObjCard currentCard = arrayAdapter.getItem(0);
+                    currentCard.setTruth(1);
+                    postTask = new postResults();
+                    postTask.execute(currentCard);
+
+                }catch (IndexOutOfBoundsException e){
+                    e.printStackTrace();
+                }
                 //makeToast(MyActivity.this, "Right!");
             }
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
+                Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
+                startService(getCards);
                 data.open();
-                Cursor cur = data.getAllCards();
+                Cursor cur = data.getNewCards(id_LastCard);
                 getDataFromCursor(cur);
-                arrayAdapter.notifyDataSetChanged();
-                data.close();
                 if (cur.getCount() > 0){
+                    arrayAdapter.notifyDataSetChanged();
                     isAdapterEmpty = false;
                 }
+                data.close();
             }
 
             @Override
@@ -223,7 +237,7 @@ public class MyActivity extends Activity {
             newCard.setTruth(c.getInt(5));
             newCard.setImage(c.getString(7));
             alObjCards.add(newCard);
-            
+            id_LastCard = newCard.getId();
         }
        
     }
