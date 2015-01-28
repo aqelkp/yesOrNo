@@ -1,0 +1,9 @@
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/classes/debug
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-e7473b9517aa55204aa2eda4c5a016091baaade9.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/classes-0deca4be32911bb57ed9b21b28d93abfdbadd7d6.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/classes-c2c38accd3de3df7d480fb9a76f890c6c78c5ac8.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/butterknife-5.1.2-398b53056db8b27098b0630582fb8c55753f73ca.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/universal-image-loader-1.9.3-456ae61f2bcdb566a915cb55c2964a1aba327488.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-851e3d98eb46a67a494f958813319be88e53cf48.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/classes-63cb90b38905a5b82438cddf952023876e3e8fa7.jar
+/home/aqel/Workspace/Android/Swipecards-master/example/build/intermediates/pre-dexed/debug/classes-a6be571dd799f0504413dfad358532d9a64a2805.jar

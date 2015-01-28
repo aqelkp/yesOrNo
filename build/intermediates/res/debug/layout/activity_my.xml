@@ -1,0 +1,21 @@
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" >
+
+    <com.lorentzos.flingswipe.SwipeFlingAdapterView
+        android:id="@+id/frame"
+        android:background="#ffeee9e2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:rotation_degrees="15.5"
+        tools:context=".MyActivity"
+        app:max_visible="2"
+        app:min_adapter_stack="3"
+        />
+
+    <include layout="@layout/buttons" />
+
+</merge>
+
+<!-- From: file:/home/aqel/Workspace/Android/Swipecards-master/example/src/main/res/layout/activity_my.xml -->
