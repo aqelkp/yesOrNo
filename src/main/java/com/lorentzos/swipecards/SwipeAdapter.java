@@ -98,9 +98,8 @@ public class SwipeAdapter extends BaseAdapter {
         }
         TextView tvDisplay = (TextView) view.findViewById(R.id.tvQuestion);
         tvDisplay.setText(Html.fromHtml(completeText));
+
         ImageView ivDisplay = (ImageView) view.findViewById(R.id.iwDisplay);
-        String tempUrl = "https://s3.amazonaws.com/hvergeimageset/dataset/hyperverge/scene/cave/1421105731344_604.6635736711323.jpg";
-        Log.d("Image ", image);
         ImageLoader.getInstance().displayImage(image, ivDisplay, options);
         return view;
     }

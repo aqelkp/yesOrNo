@@ -9,7 +9,7 @@ public class MyActivity$$ViewInjector {
     View view;
     view = finder.findRequiredView(source, 2131230783, "field 'flingContainer'");
     target.flingContainer = (com.lorentzos.flingswipe.SwipeFlingAdapterView) view;
-    view = finder.findRequiredView(source, 2131230785, "method 'right'");
+    view = finder.findRequiredView(source, 2131230787, "method 'right'");
     view.setOnClickListener(
       new android.view.View.OnClickListener() {
         @Override public void onClick(
@@ -18,7 +18,7 @@ public class MyActivity$$ViewInjector {
           target.right();
         }
       });
-    view = finder.findRequiredView(source, 2131230784, "method 'left'");
+    view = finder.findRequiredView(source, 2131230786, "method 'left'");
     view.setOnClickListener(
       new android.view.View.OnClickListener() {
         @Override public void onClick(

@@ -1,7 +1,6 @@
 package com.lorentzos.swipecards;
 
 
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
@@ -100,15 +99,20 @@ public class DatabaseHelper {
         cv.put(KEY_KEYSPACE,  obj.keyspace);
         cv.put(KEY_ANSWERED_OR_NOT, 0);
         cv.put(KEY_IMAGE, obj.getImage());
-        return ourDatabase.insert(DATABASE_TABLE, null, cv);
-
+        long id = ourDatabase.insert(DATABASE_TABLE, null, cv);
+        Log.d("id of the added", Long.toString(id));
+        return id;
     }
 
     public Cursor getAllCards () {
-
         String[] columns = new String[] {KEY_ROWID, KEY_URL, KEY_TAG, KEY_QCFLAG, KEY_KEYSPACE, KEY_TRUTH, KEY_ANSWERED_OR_NOT, KEY_IMAGE};
         Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_ANSWERED_OR_NOT + " = " + 0, null, null, null,  KEY_ROWID + " ASC");
+        return c;
+    }
 
+    public Cursor getCardById (int id) {
+        String[] columns = new String[] {KEY_ROWID, KEY_URL, KEY_TAG, KEY_QCFLAG, KEY_KEYSPACE, KEY_TRUTH, KEY_ANSWERED_OR_NOT, KEY_IMAGE};
+        Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_ROWID + " = " + id, null, null, null,  KEY_ROWID + " ASC");
         return c;
     }
 
@@ -118,99 +122,12 @@ public class DatabaseHelper {
         return null;
     }
 
-    public Cursor getNewCards(int id){
+    public int getCountOfCards(){
         String[] columns = new String[] {KEY_ROWID, KEY_URL, KEY_TAG, KEY_QCFLAG, KEY_KEYSPACE, KEY_TRUTH, KEY_ANSWERED_OR_NOT, KEY_IMAGE};
-        Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_ROWID + " > " + id, null, null, null,  KEY_ROWID + " ASC");
-        return c;
-
-    }
-
-  /*  public long addBlogger(int id, String blogger_name_en, String blogger_name_mal, String blog_name_en ,
-                           String blog_name_mal, String description, String phone_number, String email,
-                           String google_plus, String facebook, int weight, int loadedOrNot, String blog_url
-    ){
-        ContentValues cv = new ContentValues();
-        cv.put(KEY_ROWID, id);
-        cv.put("blog_name_mal", blog_name_mal);
-        cv.put("isFav", 0);
-        return ourDatabase.insert(DATABASE_BLOGGER_TABLE, null, cv);
-
-    }
-
-    
-    public Void deleteMyBlogger(int id){
-        ourDatabase.delete(DATABASE_BLOGGER_TABLE, KEY_ROWID + " = " + id, null);
-        return null;
+        Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_ANSWERED_OR_NOT + " = " + 0, null, null, null,  KEY_ROWID + " ASC");
+        int count = c.getCount();
+        return count;
     }
 
 
-    
-    public Cursor getAllData (int bloggerId) {
-
-        String[] columns = new String[] {KEY_ROWID, KEY_BLOG_ID, KEY_BLOGGER_ID, KEY_CONTENT, KEY_DATE, KEY_TITLE, KEY_READ_OR_NOT, KEY_IS_FAV_OR_NOT, KEY_CONTENT_SHORT, KEY_LINK};
-        Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_BLOGGER_ID + " = " + bloggerId, null, null, null,  KEY_DATE + " DESC");
-
-        return c;
-    }
-
-
-    
-    public Void updateAsLoaded(int id){
-        // New value for one column
-        ContentValues contentValues = new ContentValues();
-        contentValues.put("loadedOrNot", 1);
-        // Which row to update, based on the ID
-        String selection = KEY_ROWID + " LIKE ?" ;
-        String[] selectionArgs = { String.valueOf(id) };
-        int count = ourDatabase.update(
-                DATABASE_BLOGGER_TABLE,
-                contentValues,
-                selection,
-                selectionArgs);
-        Log.d("int count", Integer.toString(count));
-        return null;
-    }
-
-    public int checkIsFav(String blogId){
-        String[] columns = new String[] {KEY_ROWID, KEY_BLOG_ID, KEY_BLOGGER_ID, KEY_CONTENT, KEY_DATE, KEY_TITLE, KEY_READ_OR_NOT, KEY_IS_FAV_OR_NOT};
-        Cursor c = ourDatabase.query(DATABASE_TABLE, columns, KEY_BLOG_ID + " = '" + blogId+"'", null, null, null,  KEY_DATE + " DESC");
-        int isFav = 0;
-        while (c.moveToNext()) {
-            String a = Integer.toString(c.getInt(c.getColumnIndex(KEY_IS_FAV_OR_NOT)));
-            isFav = c.getInt(c.getColumnIndex(KEY_IS_FAV_OR_NOT));
-            Log.d("isFav On database", a + " " + blogId);
-        }
-        return isFav;
-    }
-
-    
-    public String[] getBlogger(int blogId){
-        String[] columns = new String[] {KEY_ROWID, "blogger_name_en", "blogger_name_mal", "blog_name_en" ,
-                "blog_name_mal", "blog_url", "loadedOrNot", "isFav" };
-        int id = 0,isFav=0,loadedOrNot=0;
-        String blogger_name_en = null;
-        String blogger_name_mal = null;
-        String blog_name_en = null;
-        String blog_name_mal = null;
-        String blog_url = null;
-        Cursor c = ourDatabase.query(DATABASE_BLOGGER_TABLE, columns, KEY_ROWID + " = " + blogId, null, null, null,  null);
-
-        while (c.moveToNext()) {
-            id = c.getInt(c.getColumnIndex(KEY_ROWID));
-            loadedOrNot = c.getInt(c.getColumnIndex("loadedOrNot"));
-            isFav = c.getInt(c.getColumnIndex("isFav"));
-            blogger_name_en = c.getString(c.getColumnIndex("blogger_name_en"));
-            blogger_name_mal = c.getString(c.getColumnIndex("blogger_name_mal"));
-            blog_name_en = c.getString(c.getColumnIndex("blog_name_en"));
-            blog_name_mal = c.getString(c.getColumnIndex("blog_name_mal"));
-            blog_url = c.getString(c.getColumnIndex("blog_url"));
-            Log.d("LogAq In database id", Integer.toString(id));
-        }
-        String[] toBeReturned = {blogger_name_en, blogger_name_mal, blog_name_en, blog_name_mal, blog_url
-                , Integer.toString(id), Integer.toString(isFav), Integer.toString(loadedOrNot)};
-        return toBeReturned;
-    }
-
-
-    */
 }

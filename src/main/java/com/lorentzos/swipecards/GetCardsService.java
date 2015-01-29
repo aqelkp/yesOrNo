@@ -56,9 +56,8 @@ public class GetCardsService extends IntentService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            sendBroadCast(1);
         }
-        sendBroadCast(2);
+        sendBroadCast(2, 0);
 
 //        ResultReceiver rec = intent.getParcelableExtra("receiver");
         // Extract additional values from the bundle
@@ -70,10 +69,11 @@ public class GetCardsService extends IntentService {
 //        rec.send(Activity.RESULT_OK, bundle);
     }
 
-    private void sendBroadCast(int status) {
+    private void sendBroadCast(int status, int id) {
         Intent intent = new Intent(NOTIFICATION);
         intent.putExtra(BROADCAST_STATUS, status);
-       //intent.putExtra((Serializable)newObj);
+        intent.putExtra("objectId", id);
+        //intent.putExtra((Serializable)newObj);
         //intent.putExtra("myObject", new Gson().toJson(myobject);
         sendBroadcast(intent);
         Log.d("Reciever", "BroadCast Send");
@@ -117,7 +117,6 @@ public class GetCardsService extends IntentService {
                     newObj.setQcflag(mainJSON.getInt("qcflag"));
                     newObj.setKeyspace(mainJSON.getString("keyspace"));
                     newObj.setImage(filePath);
-                    Log.d("JSON tag", mainJSON.getString("tag"));
 
                     //Downloading image
                     // Create a new HttpClient and Post Header
@@ -149,8 +148,11 @@ public class GetCardsService extends IntentService {
                     Log.e("Download ", "Finished " + fileName);
                     Log.e("Download ", "Time taken : " + Long.toString(a));
                     data.open();
-                    data.addCardObj(newObj);
+                    long idLong = data.addCardObj(newObj);
+                    newObj.setId((int)idLong);
                     data.close();
+                    sendBroadCast(1, newObj.getId());
+
 
 
                 }

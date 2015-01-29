@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -24,6 +26,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +47,7 @@ public class MyActivity extends Activity {
     final ArrayList<ObjCard> alObjCards = new ArrayList<>();
     Boolean isCardsAvailable = false;
     int id_LastCard = 0;
+    Utils utils = new Utils();
 
     @InjectView(R.id.frame) SwipeFlingAdapterView flingContainer;
 
@@ -54,24 +58,29 @@ public class MyActivity extends Activity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Bundle bundle = intent.getExtras();
+            Bundle extras = intent.getExtras();
             Log.d("Reciever ", " Broacast Recieved");
-            if (bundle != null) {
-                if (bundle.getInt(GetCardsService.BROADCAST_STATUS) == 1){
-                    Log.d("Reciever ", " Broacast Recieved inside");
-                    data.open();
-                    Cursor cur = data.getNewCards(id_LastCard);
+            if (extras != null) {
+                if (extras.getInt(GetCardsService.BROADCAST_STATUS) == 1){
+                     data.open();
+                    Log.d( "Service Last Card in reciever", Integer.toString(id_LastCard));
+                    Cursor cur = data.getCardById(extras.getInt("objectId"));
                     getDataFromCursor(cur);
                     if (cur.getCount() > 0){
                         arrayAdapter.notifyDataSetChanged();
                         isAdapterEmpty = false;
                     }
                     data.close();
+
+
                 }
-                if (bundle.getInt(GetCardsService.BROADCAST_STATUS) == 2){
+                if (extras.getInt(GetCardsService.BROADCAST_STATUS) == 2){
                     Log.d("Reciever ", " Broacast Recieved To restart");
-                    Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
-                    startService(getCards);
+                    data.open();
+                    if (data.getCountOfCards()<50) {
+                        Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
+                        startService(getCards);
+                    }
                 }
             }
         }
@@ -84,8 +93,10 @@ public class MyActivity extends Activity {
         setContentView(R.layout.activity_my);
         ButterKnife.inject(this);
 
-        Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
-        startService(getCards);
+        if (utils.checkConnection(this)){
+            Intent getCards = new Intent(this, GetCardsService.class);
+            startService(getCards);
+        }
 
         //newTask=new getJSON();
         //newTask.execute();
@@ -135,32 +146,23 @@ public class MyActivity extends Activity {
                 //Do something on the left!
                 //You also have access to the original object.
                 //If you want to use it just cast it (String) dataObject
-                ObjCard currentCard = arrayAdapter.getItem(0);
+                ObjCard currentCard = (ObjCard) dataObject;
                 currentCard.setTruth(0);
-                postTask = new postResults();
-                postTask.execute(currentCard);
-                //makeToast(MyActivity.this, "Left!");
+                executePostResult(currentCard);
             }
 
             @Override
             public void onRightCardExit(Object dataObject) {
-                try {
-                    ObjCard currentCard = arrayAdapter.getItem(0);
-                    currentCard.setTruth(1);
-                    postTask = new postResults();
-                    postTask.execute(currentCard);
-
-                }catch (IndexOutOfBoundsException e){
-                    e.printStackTrace();
-                }
-                //makeToast(MyActivity.this, "Right!");
+                ObjCard currentCard = (ObjCard) dataObject;
+                currentCard.setTruth(1);
+                executePostResult(currentCard);
             }
 
             @Override
             public void onAdapterAboutToEmpty(int itemsInAdapter) {
                 Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
                 startService(getCards);
-                data.open();
+                /*data.open();
                 Cursor cur = data.getNewCards(id_LastCard);
                 getDataFromCursor(cur);
                 if (cur.getCount() > 0){
@@ -168,6 +170,7 @@ public class MyActivity extends Activity {
                     isAdapterEmpty = false;
                 }
                 data.close();
+                */
             }
 
             @Override
@@ -178,7 +181,7 @@ public class MyActivity extends Activity {
                 View view = flingContainer.getSelectedView();
                 CardView card = (CardView) view.findViewById(R.id.layoutCard);
                 
-                Log.d("scroll percent", Float.toString(scrollProgressPercent));
+                //Log.d("scroll percent", Float.toString(scrollProgressPercent));
                 if (scrollProgressPercent>0){
                     card.setCardBackgroundColor(getResources().getColor(R.color.green));
                     bLeft.setVisibility(View.INVISIBLE);
@@ -216,10 +219,22 @@ public class MyActivity extends Activity {
         flingContainer.setOnItemClickListener(new SwipeFlingAdapterView.OnItemClickListener() {
             @Override
             public void onItemClicked(int itemPosition, Object dataObject) {
-                makeToast(MyActivity.this, "Clicked!");
+               // makeToast(MyActivity.this, "Clicked!");
             }
         });
 
+    }
+
+    public void executePostResult( ObjCard card){
+        ConnectivityManager connMgr =
+                (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeInfo = connMgr.getActiveNetworkInfo();
+        if (activeInfo != null && activeInfo.isConnected()) {
+            postTask = new postResults();
+            postTask.execute(card);
+        }else {
+           Toast.makeText(MyActivity.this, "Cannot connect to internet. Please Check your connection and try again", Toast.LENGTH_SHORT).show();
+        }
     }
 
     static void makeToast(Context ctx, String s){
@@ -239,6 +254,7 @@ public class MyActivity extends Activity {
             alObjCards.add(newCard);
             id_LastCard = newCard.getId();
         }
+         Log.d( "Service Last Card", Integer.toString(id_LastCard));
        
     }
 
@@ -267,13 +283,13 @@ public class MyActivity extends Activity {
 //            View view = flingContainer.getSelectedView();
             flingContainer.getTopCardListener().selectRight();
             View view = flingContainer.getSelectedView();
+
             CardView card = (CardView) view.findViewById(R.id.layoutCard);
             card.setCardBackgroundColor(getResources().getColor(R.color.green));
             ObjCard currentCard = arrayAdapter.getItem(0);
             currentCard.setTruth(1);
-            postTask = new postResults();
-            postTask.execute(currentCard);
-        
+            Log.d("id of the card left ", Integer.toString(currentCard.getId()));
+            executePostResult(currentCard);
         }
     }
 
@@ -290,9 +306,7 @@ public class MyActivity extends Activity {
             card.setCardBackgroundColor(getResources().getColor(R.color.red));
             ObjCard currentCard = arrayAdapter.getItem(0);
             currentCard.setTruth(1);
-            postTask = new postResults();
-            postTask.execute(currentCard);
-
+            executePostResult(currentCard);
         }
     }
 
@@ -320,6 +334,13 @@ public class MyActivity extends Activity {
             data.open();
             data.deleteCardFromQue(obj.getId());
             data.close();
+            Log.d("delete ", obj.getImage());
+            File file = new File(obj.getImage().split("file://")[1]);
+            if (file.exists()) {
+                file.delete();
+                Log.d("delete ", " file deleted");
+            }
+
             return null;
         }
 

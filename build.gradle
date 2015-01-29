@@ -22,8 +22,9 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile project(':library')
+    compile files('/home/aqel/Workspace/Android/Swipecards-master/libs/universal-image-loader-1.9.3.jar')
     compile 'com.jakewharton:butterknife:5.1.2'
     compile 'com.android.support:appcompat-v7:21.0.3'
-    compile 'com.android.support:cardview-v7:21.0.+'
-    compile files('/home/aqel/Workspace/Android/Swipecards-master/libs/universal-image-loader-1.9.3.jar')
+    compile 'com.android.support:cardview-v7:21.0.3'
+    compile 'com.android.support:support-v4:21.0.3'
 }
