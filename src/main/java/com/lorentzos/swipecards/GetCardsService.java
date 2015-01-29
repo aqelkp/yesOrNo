@@ -9,21 +9,20 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +38,10 @@ public class GetCardsService extends IntentService {
     String url;
     ObjCard newObj = new ObjCard();
     JSONParser jsonParser;
+    InputStream input = null;
+    OutputStream output = null;
+    HttpURLConnection connection = null;
+
 
     public GetCardsService() {
         super("GetPosts");
@@ -118,6 +121,40 @@ public class GetCardsService extends IntentService {
                     newObj.setKeyspace(mainJSON.getString("keyspace"));
                     newObj.setImage(filePath);
 
+
+                    URL urlImage = new URL(newObj.getUrl());
+                    //URL urlImage = new URL("https://s3-ap-southeast-1.amazonaws.com/hvergeasiabucket/1421143271122_861.13356705755.jpg");
+                    Log.d("JSON tag", "Downlaoding Images");
+                    Long time = System.currentTimeMillis();
+                    connection = (HttpURLConnection) urlImage.openConnection();
+                    connection.connect();
+
+                    // expect HTTP 200 OK, so we don't mistakenly save error report
+                    // instead of the file
+                    if (connection.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                        String error  = "Server returned HTTP " + connection.getResponseCode()
+                                + " " + connection.getResponseMessage();
+                        Log.d("error", error);
+                    }
+
+                    // download the file
+                    input = connection.getInputStream();
+                    //output = new FileOutputStream(filePath);
+                    OutputStream output = openFileOutput(fileName , Context.MODE_PRIVATE);
+
+                    byte dataImage[] = new byte[10 * 4096];
+                    long total = 0;
+                    int count;
+                    while ((count = input.read(dataImage)) != -1) {
+                        total += count;
+                        output.write(dataImage, 0, count);
+                    }
+                    Long a = System.currentTimeMillis() - time;
+                    Log.e("Download ", "Finished " + fileName);
+                    Log.e("Download ", "Time taken : " + Long.toString(a));
+
+
+                    /*
                     //Downloading image
                     // Create a new HttpClient and Post Header
                     Log.d("JSON tag", "Downlaoding Images");
@@ -146,7 +183,7 @@ public class GetCardsService extends IntentService {
                     Log.e("LOGTAG", "" + neww.getAbsolutePath());
                     Long a = System.currentTimeMillis() - time;
                     Log.e("Download ", "Finished " + fileName);
-                    Log.e("Download ", "Time taken : " + Long.toString(a));
+                    Log.e("Download ", "Time taken : " + Long.toString(a));*/
                     data.open();
                     long idLong = data.addCardObj(newObj);
                     newObj.setId((int)idLong);

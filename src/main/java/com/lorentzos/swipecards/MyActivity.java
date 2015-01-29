@@ -1,6 +1,7 @@
 package com.lorentzos.swipecards;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -48,6 +49,7 @@ public class MyActivity extends Activity {
     Boolean isCardsAvailable = false;
     int id_LastCard = 0;
     Utils utils = new Utils();
+    ProgressDialog pDialog ;
 
     @InjectView(R.id.frame) SwipeFlingAdapterView flingContainer;
 
@@ -66,11 +68,14 @@ public class MyActivity extends Activity {
                     Log.d( "Service Last Card in reciever", Integer.toString(id_LastCard));
                     Cursor cur = data.getCardById(extras.getInt("objectId"));
                     getDataFromCursor(cur);
+
                     if (cur.getCount() > 0){
                         arrayAdapter.notifyDataSetChanged();
                         isAdapterEmpty = false;
                     }
                     data.close();
+                    pDialog.dismiss();
+
 
 
                 }
@@ -81,6 +86,7 @@ public class MyActivity extends Activity {
                         Intent getCards = new Intent(MyActivity.this, GetCardsService.class);
                         startService(getCards);
                     }
+
                 }
             }
         }
@@ -97,7 +103,7 @@ public class MyActivity extends Activity {
             Intent getCards = new Intent(this, GetCardsService.class);
             startService(getCards);
         }
-
+        pDialog = new ProgressDialog(MyActivity.this);
         //newTask=new getJSON();
         //newTask.execute();
         ImageLoaderConfiguration config = new ImageLoaderConfiguration.Builder(MyActivity.this)
@@ -211,6 +217,9 @@ public class MyActivity extends Activity {
             @Override
             public void onAdapterFinished(int adapterCount) {
                 isAdapterEmpty = true;
+               // pDialog = new ProgressDialog(MyActivity.this);
+                pDialog.setMessage("Loading...");
+                pDialog.show();
             }
         });
 
